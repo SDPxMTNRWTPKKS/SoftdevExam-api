@@ -10,7 +10,7 @@ pipeline {
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent { label 'vmtest-test' }
+            agent { label 'vmtest-node' }
             steps {
                 script {
                         def containers = sh(script: "docker ps -q ", returnStdout: true).trim()
@@ -24,7 +24,7 @@ pipeline {
                 }
         }
         stage('Run Tests') {
-            agent { label 'vmtest-test' }
+            agent { label 'vmtest-node' }
             steps {
                 script {
                     try {
@@ -57,7 +57,7 @@ pipeline {
             }
         }
         stage("Delivery to GitLab Registry") {
-            agent {label 'connect-vmtest'}
+            agent {label 'vmtest-node'}
             steps {
                 withCredentials(
                     [usernamePassword(
