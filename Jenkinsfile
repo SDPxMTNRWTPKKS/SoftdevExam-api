@@ -2,7 +2,7 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // Check every 5 minutes
     }
-    agent { label 'vmtest' }
+    agent { label 'vmtest-node' }
     environment {
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SoftdevExam-api"
         DOCKER_PORT = "5000" // Specify the port to use
