@@ -22,9 +22,7 @@ pipeline {
                     }
                     sh "docker compose up -d --build"
                 }
-            }
         }
-
         stage('Run Tests') {
             agent { label 'vmtest-test' }
             steps {
