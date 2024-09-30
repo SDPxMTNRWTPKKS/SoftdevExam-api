@@ -2,7 +2,7 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // Check every 5 minutes
     }
-    agent { label 'vmtest' }
+    agent { label 'connect-vmtest' }
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/examsoftdev"
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1"
