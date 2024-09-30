@@ -5,7 +5,7 @@ pipeline {
     agent { label 'connect-vmtest' }
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/test"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1"
         DOCKER_PORT = "5000" // Specify the port to use
     }
     stages {
