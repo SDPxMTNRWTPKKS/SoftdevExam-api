@@ -25,7 +25,7 @@ pipeline {
                         . /home/vmtest/env/bin/activate
                         
                         # Clone and set up the test repository if not already cloned
-                        rm -rf exam-robottest
+                        rm -rf SoftdevExam-robot
                         git clone https://github.com/SDPxMTNRWTPKKS/SoftdevExam-robot.git || true
                         
                         # Install dependencies
