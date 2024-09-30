@@ -4,7 +4,7 @@ pipeline {
     }
     agent { label 'connect-vmtest' }
     environment {
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/ExamSoftdev"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/Jenkins-aun-job@2"
         DOCKER_PORT = "5000" // ระบุ port ที่ต้องใช้
         GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
     }
@@ -12,7 +12,14 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent { label 'connect-vmtest' }
             steps {
-                
+                script {
+                    def containers = sh(script: "docker ps -q", returnStdout: true).trim()
+                    if (containers) {
+                        sh "docker stop ${containers}"
+                    } else {
+                        echo "No running containers to stop."
+                    }
+                }
                 sh "docker compose up -d --build"
             }
         }
@@ -24,7 +31,7 @@ pipeline {
                         sh '''
                         . /home/vmtest/env/bin/activate
                         
-                        # Clone และตั้งค่าตัว repository สำหรับ robot test ถ้ายังไม่ได้ clone
+                        # Clone repository สำหรับ robot test
                         rm -rf SoftdevExam-robot
                         git clone https://github.com/SDPxMTNRWTPKKS/SoftdevExam-robot.git || true
                         
@@ -32,12 +39,12 @@ pipeline {
                         cd ${VMTEST_MAIN_WORKSPACE}
                         pip install -r requirements.txt
                         
-                        # รัน unit tests พร้อมกับ coverage
+                        # รัน unit tests พร้อม coverage
                         python3 -m unittest unit_test.py -v
                         coverage run -m unittest unit_test.py -v
                         coverage report -m
                         
-                        # รัน robot tests
+                        # รัน robot tests (ใน repository ที่ clone มาแล้ว)
                         cd SoftdevExam-robot
                         robot robot_test.robot || true
                         '''
@@ -54,7 +61,7 @@ pipeline {
             steps {
                 withCredentials(
                     [usernamePassword(
-                        credentialsId: 'gitlab-admin',
+                        credentialsId: 'gitlab-registry',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
