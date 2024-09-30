@@ -4,7 +4,7 @@ pipeline {
     }
     agent { label 'connect-vmtest' }
     environment {
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/Jenkins-aun-job@2"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/ExamSoftdev"
         DOCKER_PORT = "5000" // ระบุ port ที่ต้องใช้
         GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
     }
