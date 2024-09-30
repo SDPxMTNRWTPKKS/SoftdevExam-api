@@ -54,7 +54,7 @@ pipeline {
             steps {
                 withCredentials(
                     [usernamePassword(
-                        credentialsId: 'gitlab-registry',
+                        credentialsId: 'gitlab-admin',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
