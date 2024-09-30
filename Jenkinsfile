@@ -4,9 +4,11 @@ pipeline {
     }
     agent { label 'connect-vmtest' }
     environment {
+
+        GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry" 
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/ExamSoftdev"
         DOCKER_PORT = "5000" // ระบุ port ที่ต้องใช้
-        GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
+    
     }
     stages {
         stage('Deploy Docker Compose') {
@@ -53,7 +55,7 @@ pipeline {
             steps {
                 withCredentials(
                     [usernamePassword(
-                        credentialsId: 'gitlab-registry',
+                        credentialsId: 'gitlab-admin',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
