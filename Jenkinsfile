@@ -12,16 +12,7 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent { label 'connect-vmtest' }
             steps {
-                '''
-                script {
-                    def containers = sh(script: "docker ps -q", returnStdout: true).trim()
-                    if (containers) {
-                        sh "docker stop ${containers}"
-                    } else {
-                        echo "No running containers to stop."
-                    }
-                }
-                '''
+                
                 sh "docker compose up -d --build"
             }
         }
