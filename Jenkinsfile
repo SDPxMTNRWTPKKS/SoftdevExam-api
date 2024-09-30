@@ -1,6 +1,6 @@
 pipeline {
     triggers {
-        pollSCM('H/1 * * * *') // Check every 5 minutes
+        pollSCM('H/1 * * * *') // Check every 1 minutes
     }
     agent { label 'connect-vmtest' }
     environment {
@@ -56,7 +56,7 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernamePassword(
-                                credentialsId: 'gitlab-admin',
+                                credentialsId: 'gitlab-registry',
                                 passwordVariable: 'gitlabPassword',
                                 usernameVariable: 'gitlabUser'
                             )]
