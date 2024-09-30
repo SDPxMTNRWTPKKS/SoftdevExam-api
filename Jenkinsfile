@@ -2,15 +2,15 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // Check every 5 minutes
     }
-    agent { label 'vmtest' }
+    agent { label 'connect-vmtest' }
     environment {
-        GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/examsoftdev"
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/ExamSoftdev"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/Jenkins-aun-job@2"
         DOCKER_PORT = "5000" // Specify the port to use
+        GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent { label 'vmtest-test' }
+            agent { label 'connect-vmtest' }
             steps {
                 script {
                         def containers = sh(script: "docker ps -q ", returnStdout: true).trim()
@@ -22,11 +22,9 @@ pipeline {
                     }
                     sh "docker compose up -d --build"
                 }
-            }
         }
-
         stage('Run Tests') {
-            agent { label 'vmtest-test' }
+            agent { label 'connect-vmtest' }
             steps {
                 script {
                     try {
@@ -34,8 +32,8 @@ pipeline {
                         . /home/vmtest/env/bin/activate
                         
                         # Clone and set up the test repository if not already cloned
-                        rm -rf exam-robottest
-                        git clone https://github.com/Narongrit2544/exam-robottest.git || true
+                        rm -rf SoftdevExam-robot
+                        git clone https://github.com/SDPxMTNRWTPKKS/SoftdevExam-robot.git || true
                         
                         # Install dependencies
                         cd ${VMTEST_MAIN_WORKSPACE}
@@ -47,7 +45,7 @@ pipeline {
                         coverage report -m
                         
                         # Run robot tests
-                        cd exam-robottest
+                        cd SoftdevExam-robot
                         robot robot_test.robot || true
                         '''
                     } catch (Exception e) {
@@ -58,30 +56,20 @@ pipeline {
                 }
             }
         }
-
-        stage('Delivery to GitLab Registry') {
-            agent { label 'vmtest-test' }
+        stage("Delivery to GitLab Registry") {
+            agent {label 'connect-vmtest'}
             steps {
-                script {
-                    try {
-                        withCredentials([usernamePassword(
-                                credentialsId: 'gitlab-admin',
-                                passwordVariable: 'gitlabPassword',
-                                usernameVariable: 'gitlabUser'
-                            )]
-                        ) {
-                            echo "Logging into GitLab registry..."
-                            sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                            echo "Tagging and pushing Docker image..."
-                            sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                            sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                            sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                        }
-                    } catch (Exception e) {
-                        echo "Error during delivery: ${e.getMessage()}"
-                        currentBuild.result = 'FAILURE'
-                        error("Delivery to GitLab registry failed!")
-                    }
+                withCredentials(
+                    [usernamePassword(
+                        credentialsId: 'gitlab-registry',
+                        passwordVariable: 'gitlabPassword',
+                        usernameVariable: 'gitlabUser'
+                    )]
+                ){
+                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
