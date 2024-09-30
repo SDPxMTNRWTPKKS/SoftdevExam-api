@@ -2,9 +2,9 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // Check every 5 minutes
     }
-    agent { label 'connect-vmtest' }
+    agent { label 'vmtest' }
     environment {
-        GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
+        GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/examsoftdev"
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1"
         DOCKER_PORT = "5000" // Specify the port to use
     }
@@ -56,7 +56,7 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernamePassword(
-                                credentialsId: 'gitlab-registry',
+                                credentialsId: 'gitlab-admin',
                                 passwordVariable: 'gitlabPassword',
                                 usernameVariable: 'gitlabUser'
                             )]
