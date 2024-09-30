@@ -1,12 +1,12 @@
 pipeline {
     triggers {
-        pollSCM('H/1 * * * *') // ตรวจสอบทุก 1 นาที
+        pollSCM('H/1 * * * *') // Check every 5 minutes
     }
     agent { label 'connect-vmtest' }
     environment {
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1"
-        DOCKER_PORT = "5000" // ระบุ port ที่ต้องใช้
         GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1@2"
+        DOCKER_PORT = "5000" // Specify the port to use
     }
     stages {
         stage('Deploy Docker Compose') {
@@ -15,6 +15,7 @@ pipeline {
                 sh "docker compose up -d --build"
             }
         }
+
         stage('Run Tests') {
             agent { label 'connect-vmtest' }
             steps {
@@ -23,21 +24,21 @@ pipeline {
                         sh '''
                         . /home/vmtest/env/bin/activate
                         
-                        # Clone และตั้งค่าตัว repository สำหรับ robot test ถ้ายังไม่ได้ clone
-                        rm -rf SoftdevExam-robot
-                        git clone https://github.com/SDPxMTNRWTPKKS/SoftdevExam-robot.git || true
+                        # Clone and set up the test repository if not already cloned
+                        rm -rf exam-robottest
+                        git clone https://github.com/Narongrit2544/exam-robottest.git || true
                         
-                        # ติดตั้ง dependencies
+                        # Install dependencies
                         cd ${VMTEST_MAIN_WORKSPACE}
                         pip install -r requirements.txt
                         
-                        # รัน unit tests พร้อมกับ coverage
+                        # Run unit tests with coverage
                         python3 -m unittest unit_test.py -v
                         coverage run -m unittest unit_test.py -v
                         coverage report -m
                         
-                        # รัน robot tests
-                        cd SoftdevExam-robot
+                        # Run robot tests
+                        cd exam-robottest
                         robot robot_test.robot || true
                         '''
                     } catch (Exception e) {
@@ -48,20 +49,30 @@ pipeline {
                 }
             }
         }
-        stage("Delivery to GitLab Registry") {
-            agent {label 'connect-vmtest'}
+
+        stage('Delivery to GitLab Registry') {
+            agent { label 'connect-vmtest' }
             steps {
-                withCredentials(
-                    [usernamePassword(
-                        credentialsId: 'gitlab-registry',
-                        passwordVariable: 'gitlabPassword',
-                        usernameVariable: 'gitlabUser'
-                    )]
-                ) {
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                script {
+                    try {
+                        withCredentials([usernamePassword(
+                                credentialsId: 'gitlab-registry',
+                                passwordVariable: 'gitlabPassword',
+                                usernameVariable: 'gitlabUser'
+                            )]
+                        ) {
+                            echo "Logging into GitLab registry..."
+                            sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                            echo "Tagging and pushing Docker image..."
+                            sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                            sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                            sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        }
+                    } catch (Exception e) {
+                        echo "Error during delivery: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                        error("Delivery to GitLab registry failed!")
+                    }
                 }
             }
         }
