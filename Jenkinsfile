@@ -2,7 +2,7 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // ตรวจสอบทุก 1 นาที
     }
-    agent { label 'vmtest-node' }
+    agent { label 'connect-vmtest' }
     environment {
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/SDPx1"
         DOCKER_PORT = "5000" // ระบุ port ที่ต้องใช้
@@ -10,7 +10,7 @@ pipeline {
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent { label 'vmtest-node' }
+            agent { label 'connect-vmtest' }
             steps {
                 '''
                 script {
@@ -26,7 +26,7 @@ pipeline {
             }
         }
         stage('Run Tests') {
-            agent { label 'vmtest-node' }
+            agent { label 'connect-vmtest' }
             steps {
                 script {
                     try {
@@ -59,7 +59,7 @@ pipeline {
             }
         }
         stage("Delivery to GitLab Registry") {
-            agent {label 'vmtest-node'}
+            agent {label 'connect-vmtest'}
             steps {
                 withCredentials(
                     [usernamePassword(
