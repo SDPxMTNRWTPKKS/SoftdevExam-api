@@ -25,8 +25,8 @@ pipeline {
                         . /home/vmtest/env/bin/activate
                         
                         # Clone and set up the test repository if not already cloned
-                        rm -rf SoftdevExam-robot
-                        git clone https://github.com/SDPxMTNRWTPKKS/SoftdevExam-robot.git || true
+                        rm -rf exam-robottest
+                        git clone https://github.com/Narongrit2544/exam-robottest.git || true
                         
                         # Install dependencies
                         cd ${VMTEST_MAIN_WORKSPACE}
@@ -38,7 +38,7 @@ pipeline {
                         coverage report -m
                         
                         # Run robot tests
-                        cd SoftdevExam-robot
+                        cd exam-robottest
                         robot robot_test.robot || true
                         '''
                     } catch (Exception e) {
