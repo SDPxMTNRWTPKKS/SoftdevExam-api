@@ -3,17 +3,17 @@ from app import app
 
 class PrimeTestCase(unittest.TestCase):
 
-    def test_true_when_x_is_17(self):
-        response = app.show_number(17)
+    def test_true_when_x_is_1(self):
+        response = app.show_number(1)
         self.assertEqual(response, 'True')
 
-    def test_false_when_x_is_36(self):
-        response = app.show_number(36)
+    def test_false_when_x_is_0(self):
+        response = app.show_number(0)
         self.assertEqual(response, 'False')
 
-    def test_true_when_x_is_13219(self):
-        response = app.show_number(13219)
-        self.assertEqual(response, 'True')
+    def test_true_when_x_is_nev2(self):
+        response = app.show_number(-2)
+        self.assertEqual(response, 'False')
 
 if __name__ == '__main__':
     unittest.main()
