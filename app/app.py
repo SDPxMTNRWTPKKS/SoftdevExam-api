@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "ExamSoftdev Success!!!!!"
+    return "ExamSoftdev Success"
 
 @app.route('/is_prime/<x>',methods=['GET'])
 def show_number(x):
